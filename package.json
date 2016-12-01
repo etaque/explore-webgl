@@ -1,0 +1,27 @@
+{
+  "name": "explore-webgl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "chokidar": "^1.6.1",
+    "chokidar-cli": "^1.2.0"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^1.2.0"
+  },
+  "scripts": {
+    "build": "elm make Main.elm",
+    "watch": "chokidar '*.elm' --initial -d 750 -t 500 -i '/#/' -c 'yarn run build'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etaque/explore-webgl.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/etaque/explore-webgl/issues"
+  },
+  "homepage": "https://github.com/etaque/explore-webgl#readme"
+}
