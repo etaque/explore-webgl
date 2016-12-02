@@ -45,6 +45,7 @@ grid =
         |> Grid.set (WindCell 8) ( 2, 0 )
         |> Grid.set (WindCell 1) ( 0, 1 )
         |> Grid.set (WindCell 3) ( 1, 1 )
+        |> Grid.set (WindCell 3) ( 21, 1 )
 
 
 mesh : Drawable Attribute
@@ -62,13 +63,14 @@ mesh =
         h4 =
             h / 4
     in
-        Triangle
-            [ ( Attribute (vec2 -w2 -h4), Attribute (vec2 0 -h2), Attribute (vec2 0 0) )
-            , ( Attribute (vec2 0 -h2), Attribute (vec2 w2 -h4), Attribute (vec2 0 0) )
-            , ( Attribute (vec2 w2 -h4), Attribute (vec2 w2 h4), Attribute (vec2 0 0) )
-            , ( Attribute (vec2 w2 h4), Attribute (vec2 0 h2), Attribute (vec2 0 0) )
-            , ( Attribute (vec2 0 h2), Attribute (vec2 -w2 h4), Attribute (vec2 0 0) )
-            , ( Attribute (vec2 -w2 h4), Attribute (vec2 -w2 -h4), Attribute (vec2 0 0) )
+        TriangleFan
+            [ Attribute (vec2 0 0)
+            , Attribute (vec2 -w2 -h4)
+            , Attribute (vec2 0 -h2)
+            , Attribute (vec2 w2 -h4)
+            , Attribute (vec2 w2 h4)
+            , Attribute (vec2 0 h2)
+            , Attribute (vec2 -w2 h4)
             ]
 
 
@@ -116,7 +118,8 @@ view model =
         [ width <| round (toFloat model.size.width * model.devicePixelRatio)
         , height <| round (toFloat model.size.height * model.devicePixelRatio)
         , style
-            [ ( "transform-origin", "0 0" )
+            [ ( "position", "absolute" )
+            , ( "transform-origin", "0 0" )
             , ( "transform", "scale(" ++ toString (1 / model.devicePixelRatio) ++ ")" )
             ]
         ]
@@ -133,7 +136,7 @@ renderCell { width, height } tile =
             , hexSize = Vec2.fromTuple (Hexagons.dims hexRadius)
             }
     in
-        render vertexShader fragmentShader mesh (Debug.log "uniform" uniform)
+        render vertexShader fragmentShader mesh uniform
 
 
 type alias Attribute =
