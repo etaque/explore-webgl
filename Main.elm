@@ -3,7 +3,7 @@ module Main exposing (..)
 import Math.Vector2 as Vec2 exposing (..)
 import WebGL exposing (..)
 import Html exposing (Html)
-import Html.Attributes exposing (width, height)
+import Html.Attributes exposing (width, height, style)
 import AnimationFrame
 import Time exposing (Time)
 import Hexagons
@@ -11,6 +11,7 @@ import Hexagons.Grid as Grid exposing (Grid)
 import Dict
 import Window
 import Task
+import Json.Decode as Json
 
 
 type Msg
@@ -22,12 +23,13 @@ type alias Model =
     { time : Time
     , size : Window.Size
     , grid : Grid WindCell
+    , devicePixelRatio : Float
     }
 
 
-initialModel : Model
-initialModel =
-    Model 0 { width = 100, height = 100 } grid
+initialModel : Float -> Model
+initialModel devicePixelRatio =
+    Model 0 { width = 100, height = 100 } grid devicePixelRatio
 
 
 type alias WindCell =
@@ -70,16 +72,27 @@ mesh =
             ]
 
 
-main : Program Never Model Msg
+main : Program Json.Value Model Msg
 main =
-    Html.program
-        { init = ( initialModel, Task.perform WindowSize Window.size )
+    Html.programWithFlags
+        { init = init
         , view = view
         , subscriptions =
             \model -> Window.resizes WindowSize
             -- (\model -> AnimationFrame.diffs Basics.identity)
         , update = update
         }
+
+
+init : Json.Value -> ( Model, Cmd Msg )
+init flags =
+    let
+        devicePixelRatio =
+            flags
+                |> Json.decodeValue (Json.field "devicePixelRatio" Json.float)
+                |> Result.withDefault 2
+    in
+        ( initialModel devicePixelRatio, Task.perform WindowSize Window.size )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,7 +113,13 @@ hexRadius =
 view : Model -> Html msg
 view model =
     WebGL.toHtml
-        [ width model.size.width, height model.size.height ]
+        [ width <| round (toFloat model.size.width * model.devicePixelRatio)
+        , height <| round (toFloat model.size.height * model.devicePixelRatio)
+        , style
+            [ ( "transform-origin", "0 0" )
+            , ( "transform", "scale(" ++ toString (1 / model.devicePixelRatio) ++ ")" )
+            ]
+        ]
         (List.map (renderCell model.size) (Grid.list model.grid))
 
 
